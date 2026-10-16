@@ -3,6 +3,12 @@
 This file is the source of truth for release notes.
 The newest entry must match the version in `WandEnhancer/Properties/AssemblyInfo.cs`.
 
+## [2.1.0.1] - 2026-10-16
+
+### Fixes
+
+- Fixed automatic patching after a Wand update selecting an older `app-*` folder whose timestamp became newer when it was patched. Installed clients are now ordered by semantic version first, so Wand 12.64.0 is selected over a previously patched 12.63.0.
+
 ## [2.1.0.0] - 2026-09-09
 
 ### Features

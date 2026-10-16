@@ -56,6 +56,23 @@ $resources = Join-Path $install 'resources'
 [IO.Directory]::CreateDirectory($resources) | Out-Null
 
 try {
+    $installsType = $assembly.GetType('WandEnhancer.Utils.WeModInstalls', $true)
+    $findLatestInstall = $installsType.GetMethod('FindLatestWeMod')
+    $selectionRoot = Join-Path $scratch 'version-selection'
+    $olderInstall = Join-Path $selectionRoot 'app-12.63.0'
+    $newerInstall = Join-Path $selectionRoot 'app-12.64.0'
+    foreach ($candidate in $olderInstall, $newerInstall) {
+        [IO.Directory]::CreateDirectory((Join-Path $candidate 'resources')) | Out-Null
+        [IO.File]::WriteAllText((Join-Path $candidate 'Wand.exe'), '')
+        [IO.File]::WriteAllText((Join-Path $candidate 'resources\app.asar'), '')
+    }
+    # Reproduces an already-patched old install looking newer by timestamp than
+    # the just-downloaded update beside it.
+    [IO.Directory]::SetLastWriteTime($olderInstall, [DateTime]::Now)
+    [IO.Directory]::SetLastWriteTime($newerInstall, [DateTime]::Now.AddHours(-1))
+    $selectedInstall = $findLatestInstall.Invoke($null, [object[]]@([string]$selectionRoot))
+    Assert-Equal $selectedInstall.RootDirectory $newerInstall 'Newest semantic app version selection'
+
     $enhancerType = $assembly.GetType('WandEnhancer.Core.Enhancer', $true)
     $isPatched = $enhancerType.GetMethod('IsPatched')
     $hasBackup = $enhancerType.GetMethod('HasBackup')
@@ -112,7 +129,7 @@ try {
     }
     Assert-Equal ([IO.File]::ReadAllText((Join-Path $scratch 'FixtureClient.exe'))) 'original launcher' 'Restore launcher'
     Assert-Equal ($isPatched.Invoke($null, $installArgument)) $false 'Restored installation'
-    Write-Host 'Desktop regression checks passed (native sizes, backups, rollback, retry state, restore).'
+    Write-Host 'Desktop regression checks passed (version selection, native sizes, backups, rollback, retry state, restore).'
 }
 finally {
     Remove-Item -LiteralPath $scratch -Recurse -Force
