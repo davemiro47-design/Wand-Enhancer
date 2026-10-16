@@ -26,17 +26,17 @@ namespace WandEnhancer.Core.Patching.Strategies.Static
         /// <returns>True if rewritten, false if the resource is absent from this build (skip, not a failure).</returns>
         public static bool Patch(string exePath, string asarPath, Action<string, ELogType> log)
         {
-            string newHash = AsarHeaderHash.Compute(asarPath);
-            if (newHash.Length != HashHexLength)
-            {
-                throw new Exception("Computed asar header hash is not 64 hex characters; cannot patch the integrity resource safely.");
-            }
-
             byte[] anchor = Encoding.UTF8.GetBytes(AnchorPrefix);
             long hashOffset = FindSoleHashOffset(exePath, anchor);
             if (hashOffset < 0)
             {
                 return false;
+            }
+
+            string newHash = AsarHeaderHash.Compute(asarPath);
+            if (newHash.Length != HashHexLength)
+            {
+                throw new Exception("Computed asar header hash is not 64 hex characters; cannot patch the integrity resource safely.");
             }
 
             using (var stream = new FileStream(exePath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))

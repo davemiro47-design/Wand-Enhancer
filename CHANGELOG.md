@@ -8,6 +8,7 @@ The newest entry must match the version in `WandEnhancer/Properties/AssemblyInfo
 ### Fixes
 
 - Added support for the additional integrity checks introduced in Wand 12.61 and still present in 12.64. The static patch now neutralises the auxiliary service's ASAR-fuse re-check and updates Wand.exe's embedded ASAR header hash after patching.
+- Restoring or rolling back now rewrites that embedded hash for the pristine archive as well, so disabling the enhancer cannot leave Wand failing its own integrity check.
 - Replaced the overwritten launcher-based update hook with a background watcher so auto-apply can detect new Squirrel `app-*` directories as they are installed.
 
 ## [2.1.0.1] - 2026-10-16
