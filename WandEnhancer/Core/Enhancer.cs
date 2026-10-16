@@ -306,7 +306,7 @@ namespace WandEnhancer.Core
                 // Undo on-disk fuse and launcher deployment to prevent a tampered unlaunchable Wand.
                 LauncherDeployment.Restore(_weModConfig);
                 DiskFusePatch.Remove(_weModConfig.ExecutablePath, _logger);
-                AsarIntegrityResourcePatch.Patch(_weModConfig.ExecutablePath, _asarPath, _logger);
+                RestoreAsarIntegrityResource();
 
                 _logger("[ENHANCER] Patch failed - the original Wand files were restored.", ELogType.Warn);
             }
@@ -344,7 +344,7 @@ namespace WandEnhancer.Core
             // Undo all footprints at once: launcher stub and on-disk fuse.
             LauncherDeployment.Restore(_weModConfig);
             DiskFusePatch.Remove(_weModConfig.ExecutablePath, _logger);
-            AsarIntegrityResourcePatch.Patch(_weModConfig.ExecutablePath, _asarPath, _logger);
+            RestoreAsarIntegrityResource();
 
             string squirrelRoot = SquirrelRoot;
             foreach (var leftover in new[]
@@ -368,6 +368,16 @@ namespace WandEnhancer.Core
             File.Delete(_backupPath);
             Directory.Delete(_unpackedBackupPath, true);
             _logger("[ENHANCER] Backup restored successfully.", ELogType.Success);
+        }
+
+        private void RestoreAsarIntegrityResource()
+        {
+            // Some recovery fixtures and partially removed installs have no version executable.
+            // The archive backups can still be restored; there is simply no PE resource to repair.
+            if (File.Exists(_weModConfig.ExecutablePath))
+            {
+                AsarIntegrityResourcePatch.Patch(_weModConfig.ExecutablePath, _asarPath, _logger);
+            }
         }
     }
 }
