@@ -3,6 +3,13 @@
 This file is the source of truth for release notes.
 The newest entry must match the version in `WandEnhancer/Properties/AssemblyInfo.cs`.
 
+## [2.1.0.2] - 2026-10-16
+
+### Fixes
+
+- Added support for the additional integrity checks introduced in Wand 12.61 and still present in 12.64. The static patch now neutralises the auxiliary service's ASAR-fuse re-check and updates Wand.exe's embedded ASAR header hash after patching.
+- Replaced the overwritten launcher-based update hook with a background watcher so auto-apply can detect new Squirrel `app-*` directories as they are installed.
+
 ## [2.1.0.1] - 2026-10-16
 
 ### Fixes
